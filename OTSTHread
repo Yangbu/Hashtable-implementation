@@ -1,0 +1,320 @@
+// package whatever; // don't place package name!
+
+import java.io.*;
+import java.util.*;
+import java.time.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class MyCode {
+    private Lock lock = new ReentrantLock();
+    private Condition condition = lock.newCondition();
+
+    public static void main(String[] args) {
+        MyCode abc = new MyCode();
+
+        PrintThread a = abc.new PrintThread("network", true, 300);
+        PrintThread b = abc.new PrintThread("USB", false, 200);
+        PrintThread c = abc.new PrintThread("operator", false,500);
+
+        a.setNext(b);
+        b.setNext(c);
+        c.setNext(a);
+
+        ExecutorService executor = Executors.newFixedThreadPool(3);// 通过线程池执行
+        for (int i = 0; i < 3; i++) {
+            executor.execute(a);
+            executor.execute(b);
+            executor.execute(c);
+        }
+        executor.shutdown();
+    }
+
+    class PrintThread implements Runnable {
+        private String name;
+
+        private PrintThread next;
+
+        private boolean execute;
+      
+        private int time;
+
+        public PrintThread(String name, boolean execute, int time) {
+            this.name = name;
+            this.execute = execute;
+            this.time = time;
+        }
+
+        public PrintThread(String name, PrintThread next, boolean execute) {
+            this.name = name;
+            this.next = next;
+            this.execute = execute;
+        }
+
+        public void run() {
+            lock.lock();
+            try {
+                while (true) {
+
+                    if (execute) {
+                        print();
+                        execute = false;
+                        next.setExecute(true);
+                        try {
+                            Thread.sleep(time);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        condition.signalAll();
+                        break;
+                    } else {
+                        try {
+                             condition.await();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public void print() {
+            System.out.println(name);
+        }
+
+        public void setExecute(boolean execute) {
+            this.execute = execute;
+        }
+
+        public void setNext(PrintThread next) {
+            this.next = next;
+        }
+    }
+}
+
+
+/* 
+Your last Java code is saved below:
+// package whatever; // don't place package name!
+
+import java.io.*;
+
+class MyCode {
+  public static void main (String[] args) {
+    int[] test = {23, 8, 15, 2, 3};
+    System.out.println(localMin(test));
+  }
+  public static int localMin(int[] a) {
+    if (a.length == 1)
+      return 0;
+    if (a.length == 2)
+      return Math.min(a[0], a[1]);
+    if (a[0] <= a[1])
+      return 0;
+    if (a[a.length - 1] <= a[a.length - 2])
+      return a.length - 1;
+    for (int i = 1; i < a.length - 1; i++) {
+      if (a[i] <= a[i - 1] && a[i] <= a[i + 1])
+        return i;
+    }
+    return -1;
+  }
+}
+
+
+/* 
+Your last Java code is saved below:
+// package whatever; // don't place package name!
+
+import java.io.*;
+
+class MyCode {
+  public static void main (String[] args) {
+    String f = "x + 2 - 2x";
+    String[] t = f.split("(?=[+-])");
+    for (String s : t)
+      System.out.println(s);
+  }
+  
+    public String removeKdigits(String num, int k) {
+        int len = num.length() - k;
+        char[] digits = new char[num.length()];
+        int top = 0;
+        for (int i = 0; i < num.length(); i++) {
+            char c = num.charAt(i);
+            while (top > 0 && digits[top - 1] > c && k > 0) {
+                top--;
+                k--;
+            }
+            digits[top++] = c;
+        }
+        int index = 0;
+        while (index < len && digits[index] == '0') index++;
+        return index >= len? "0" : new String(digits, index, len - index);
+    }
+  
+}
+
+
+/* 
+Your last Java code is saved below:
+// package whatever; // don't place package name!
+
+import java.io.*;
+import java.util.*;
+
+class MyCode {
+  static class Movie{
+    private int  id;
+    private float rating;
+    List<Movie> neighbors;
+    public Movie( int id, float rating ) {
+      this.id = id;
+      this.rating = rating;
+    }
+  }
+  
+  public static void main (String[] args) {
+    Movie m0 = new Movie(0, (float)1.0000);
+    Movie m1 = new Movie(1, (float)2.0000);
+    Movie m2 = new Movie(2, (float)3.0000);
+    m0.neighbors = new LinkedList<>();
+    m0.neighbors.add(m1);
+     m1.neighbors = new LinkedList<>();
+    m1.neighbors.add(m2);
+    m2.neighbors = new LinkedList<>();
+    List<Movie> result = solution(m0, 1);
+    for (Movie m: result)
+      System.out.println(m.id);
+  }
+  public static List<Movie> solution( Movie m, int k ) {
+    List<Movie> result = new LinkedList<>();
+    if (m == null)
+      return result;
+    PriorityQueue<Movie> minHeap = new PriorityQueue<Movie>((a,b) -> (Float.compare(a.rating, b.rating)));
+    Set<Integer> set = new HashSet<>();
+    Queue<Movie> queue = new LinkedList<>();
+    set.add(m.id);
+    queue.offer(m);
+    while (!queue.isEmpty()) {
+      int size = queue.size();
+      for (int i = 0; i < size; i++) {
+        Movie cur = queue.poll();
+        List<Movie> next = cur.neighbors;
+        for (int j = 0; j < next.size(); j++) {
+          for (Movie t : next) {
+          if (set.add(t.id)) {
+            queue.offer(t);
+            minHeap.offer(t);
+            if (minHeap.size() > k)
+              minHeap.poll();
+          }
+        }
+        }
+      }
+    }
+    while (!minHeap.isEmpty())
+      result.add(minHeap.poll());
+    return result;
+  }
+}
+
+
+/* 
+Your last Java code is saved below:
+// package whatever; // don't place package name!
+
+import java.io.*;
+import java.util.*;
+
+class MyCode {
+  static class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode (int val) {
+      this.val = val;
+    }
+  }
+  
+  private static TreeNode root;
+  public static void main (String[] args) {
+    int[] values = {1,2,3,4,5};
+    System.out.println(bstDistance(values, 1, 6));
+  }
+  
+  public static int bstDistance( int[] values, int node1, int node2 ){
+    if (values == null || values.length == 0)
+      return -1;
+    for (int value : values)
+      buildBST(value);
+    int dis1 = disToRoot(root, node1);
+    int dis2 = disToRoot(root, node2);
+    if (dis1 == -1 || dis2 == -1)
+      return -1;
+    TreeNode cur = root;
+    TreeNode ancestor = lca(cur, node1, node2);
+    int dis3 = disToRoot(root, ancestor.val);
+    return dis1 + dis2 - 2 * dis3;
+  }
+  public static void buildBST(int val) {
+    if (root == null) {
+      root = new TreeNode(val);
+      return;
+    }
+    TreeNode cur = root;
+    while (cur != null) {
+      if (cur.val == val)
+        return;
+      else if (cur.val < val) {
+        if (cur.right == null) {
+          cur.right = new TreeNode(val);
+          return;
+        }
+        cur = cur.right;
+      } else if (cur.val > val) {
+        if (cur.left == null) {
+          cur.left = new TreeNode(val);
+          return;
+        }
+        cur = cur.left;
+      }
+    }
+  }
+  public static int disToRoot(TreeNode root, int val) {
+    int dis = -1;
+    TreeNode cur = root;
+    while (cur != null) {
+      if (cur.val == val)
+        return dis + 1;
+      else if (cur.val < val) {
+        cur = cur.right;
+        dis++;
+      } else {
+        cur = cur.left;
+        dis++;
+      }
+    }
+    return -1;
+  }
+  public static TreeNode lca(TreeNode root, int v1, int v2) {
+    
+    if (root == null || root.val == v1 || root.val == v2 || (root.val - v1) * (root.val - v2) < 0)
+      return root;
+    if (root.val < v1)
+      return lca(root.right, v1, v2);
+    if (root.val > v1)
+      return lca(root.left, v1, v2);
+    return root;
+  }
+}
+
+ */
+ /*
+ https://www.cnblogs.com/fangfan/p/3957665.html
+ */
