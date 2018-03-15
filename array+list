@@ -1,0 +1,69 @@
+class MyEntry{
+    Object key;
+    Object value;
+    MyEntry (Object key, Object value) {
+      this.key = key;
+      this.value = value;
+    }
+  }
+  LinkedList[] arr = new LinkedList[10];
+   int size;
+
+   public void put(Object key, Object value) {
+   MyEntry entry = new MyEntry(key, value);
+   int hash = key.hashCode();
+   hash = hash < 0 ? -hash : hash;// 用来计算数组下标，保证为正数
+
+   int a = hash % arr.length;//确保下标小于10
+   // 没有出现hash冲突，直接保存
+   if (arr[a] == null) {
+       LinkedList<MyEntry> list = new LinkedList<MyEntry>();
+       list.add(entry);
+       arr[a]=list;
+       size++;
+   } else {
+       LinkedList<MyEntry> list = arr[a];
+       // 出现hash冲突，则遍历桶（这里的链表称为桶）
+       for (MyEntry e : list) {
+       // 如果出现了相同的key，则替换
+       if (e.key.equals(key)) {
+           e.value = value;
+           break;
+       } else {
+           list.add(entry);
+           size++;
+       }
+       }
+   }
+   }
+
+   public Object get(Object key){
+   //根据key的hash，计算出数组的下标
+   int hash = key.hashCode();
+   hash = hash < 0 ? -hash : hash;
+   int a = hash % arr.length;
+
+   LinkedList<MyEntry> list = arr[a];
+   if(list != null){
+       if(list.size()==1){
+       return list.get(0).value;
+       }else{
+       for(MyEntry entry:list){
+           if(entry.key.equals(key)){
+           return entry.value;
+           }
+       }
+       }
+   }
+   return null;
+   }
+
+   public static void main(String[] args) {
+   MyCode map = new MyCode();
+   map.put("aaa", "dingding");
+   map.put("bbb", "chaochao");
+   System.out.println(map.get("aaa"));
+   System.out.println(map.get("bbb"));
+   map.put("aaa", "duanduan");
+   System.out.println(map.get("aaa"));
+   }
