@@ -1,3 +1,8 @@
+/*
+Rewrite HashMap with array and linkedlist
+*/
+
+
 class MyEntry{
     Object key;
     Object value;
