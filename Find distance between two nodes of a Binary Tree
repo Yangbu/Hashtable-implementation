@@ -1,0 +1,78 @@
+//'main' method must be in a class 'Rextester'.
+//Compiler version 1.8.0_111
+
+import java.util.*;
+import java.lang.*;
+
+class Rextester
+{  
+    public static void main(String args[])
+    {
+        TreeNode  root = new TreeNode(1);
+        root.left = new TreeNode(2);
+        root.right = new TreeNode(3);
+        root.left.left = new TreeNode(4);
+        root.left.right = new TreeNode(5);
+        root.right.left = new TreeNode(6);
+        root.right.right = new TreeNode(7);
+        root.right.left.right = new TreeNode(8);
+        
+        System.out.println("Dist(4, 5) = "+dis(root, root.left.left, root.left.right));
+        System.out.println("Dist(4, 6) = "+dis(root, root.left.left, root.right.left));
+        System.out.println("Dist(3, 4) = "+dis(root, root.right, root.left.left));
+    }
+      static class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode (int val) {
+      this.val = val;
+    }
+  }
+  static int dis1 = -1;
+  static int dis2 = -1;
+  static int dis = 0;
+  
+  public static TreeNode lca(TreeNode root, TreeNode t1, TreeNode t2, int level) {
+    if (root == null)
+      return null;
+    if (t1 == root) {
+      dis1 = level;
+      return root;
+    }
+    if (t2 == root) {
+      dis2 = level;
+      return root;
+    }
+    TreeNode leftLca = lca(root.left, t1, t2, level + 1);
+    TreeNode rightLca = lca(root.right, t1, t2, level + 1);
+    if (leftLca != null && rightLca != null) {
+      dis = dis1 + dis2 - 2 * level;
+      return root;
+    }
+    return leftLca == null? rightLca : leftLca;
+  }
+  
+  public static int dis(TreeNode root, TreeNode t1, TreeNode t2) {
+    TreeNode lca = lca(root, t1, t2, 0);
+    if (dis1 != -1 && dis2 != -1) {
+      return dis;
+    }
+    if (dis1 != -1) {
+      return disDown(lca, t2);
+    }
+    if (dis2 != -1) {
+      return disDown(lca, t1);
+    }
+    return -1;
+  }
+  
+  public static int disDown(TreeNode root, TreeNode t) {
+    if (root == null)
+      return -1;
+    if (root == t)
+      return 0;
+    int left = disDown(root.left, t);
+    return left != -1? left : disDown(root.right, t);
+  }
+}
