@@ -1,0 +1,84 @@
+/*
+
+ * Implement a priority queue using a heap
+ * The heap is implemented using an array indexed from 1
+*/
+
+  public static void main (String[] args) {
+     PriorityQueueUsingHeap<Integer> pq = new PriorityQueueUsingHeap<Integer>();
+        pq.insert(3);
+        System.out.println(pq.toString());
+        pq.insert(5);
+        System.out.println(pq.toString());
+        pq.insert(2);
+        System.out.println(pq.toString());
+    
+        pq.remove();
+        System.out.println(pq.toString());
+//         pq.remove();
+//         System.out.println(pq.toString());
+  }
+  
+  static class PriorityQueueUsingHeap<T extends Comparable<T>> {
+    List<T> list;
+    int count;
+    
+    public PriorityQueueUsingHeap() {
+      list =  new ArrayList<>();
+      list.add(null);
+      count = 0;
+    }
+    
+    public void insert(T t) {
+      list.add(t);
+      count++;
+      swim(count);
+    }
+    
+    public void swim(int count) {
+      while (count > 1 && less(count / 2, count)) {
+        Collections.swap(list, count / 2, count);
+        count = count / 2;
+      }
+    }
+    
+    public boolean less(int i, int j) {
+      if (list.get(i).compareTo(list.get(j)) < 0)
+        return true;
+      return false;
+    }
+    
+    private boolean isEmpty() {
+      return count == 0;
+    }
+    
+    public void remove() {
+      if (isEmpty())
+        return;
+      T t = list.get(1);
+      Collections.swap(list, 1, count--);
+      list.set(count + 1, null);
+      System.out.println(count);
+      sink(1);
+    }
+    
+    public void sink(int k) {
+      while (k * 2 < count) {
+        int j = k * 2;
+        if (j < count && less(j, j + 1))
+          j++;
+        System.out.println("!!!  " + list.get(j));
+        if (less(j, k))
+          break;
+        Collections.swap(list, k, j);
+        k = j;
+      }
+    }
+    
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        for(int i = 1; i <= count; i ++)
+            sb.append(list.get(i).toString()+" ");
+        return sb.toString();
+    }
+  }
