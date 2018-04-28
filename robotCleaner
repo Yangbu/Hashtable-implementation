@@ -1,0 +1,41 @@
+/*
+设计一个扫地机器人。
+这个机器人可以前进，向左转，向右转。
+方法有move, turnRight, turnLeft, clean()。
+设计相应的数据结构使得它能扫完整个房间。房间大小未知，机器人的初始位置未知
+*/
+
+  
+  
+  public void clean (Robot robot) {
+    Set<int[]> visited = new HashSet<>();
+    dfs(robot, 0, 0, visited);
+  }
+  
+  public void dfs(Robot robot, int i, int j, Set<int[]> visited) {
+    robot.clean();
+    visited.add(new int[]{i, j});
+    if (!visited.contains(new int[]{i + 1,c}) && move(robot, 1)) {
+      dfs(robot, i + 1, c);
+      move(robot, 3);
+    }
+    if (!visited.contains(new int[]{i - 1, c}) && move(robot, 3)) {
+      dfs(robot, i - 1, c);
+      move(robot, 1);
+    }
+    if (!visited.contains(new int[]{i, c + 1}) && move(robot, 0)) {
+      dfs(robot, i, c + 1);
+      move(robot, 2);
+    }
+    if (!visited.contains(new int[]{i, c - 1}) && move(robot, 2)) {
+      dfs(robot, i, c - 1);
+      move(robot, 0);
+    }
+  }
+  private direction = 0;
+  public boolean move(Robot robot, int count) {
+    int rightTimes = (count - direction) % 4;
+    while (rightTimes-- > 0)
+      robot.turnRight();
+    return robot.move();
+  }
