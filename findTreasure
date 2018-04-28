@@ -1,0 +1,42 @@
+  //给你一堆房间，有些房间里面有钥匙，有些房间需要特定的钥匙打开，
+  //还有一个房间里面有宝藏，还会给你这些房间之间相连的关系，问你能不能从给定的某一个房间找到最后的宝藏
+  class Room {
+    int id;
+    boolean needKey;
+    boolean hasTreasure;
+    int hasKey;
+    List<Room> next;
+  }
+  
+  Set<Integer> visited = new HashSet<>();
+  Set<Integer> foundKey = new HashSet<>();
+  Queue<Room> needKey = new LinkedList<>();
+  boolean find = false;
+  
+  public boolean findTreasure(Room start) {
+    dfs(start);
+    while (!needKey.isEmpty()) {
+      if (foundKey.contains(needKey.peek().id)) {
+        dfs(needKey.poll());
+      }
+    }
+    return find;
+  }
+  
+  public void dfs(Room room) {
+    if (visited.contains(room))
+      return;
+    if (room.needKey && !foundKey.contains(room.needKey)) {
+      needKey.add(room);
+      return;
+    }
+    if (room.hasTreasure) {
+      find = true;
+      return;
+    }
+    if (room.hasKey != -1) {
+      foundKey.add(room.hasKey);
+    }
+    for (Room next : room.next)
+      dfs(next);
+  }
